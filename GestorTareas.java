@@ -1,7 +1,10 @@
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.function.Predicate;
 import java.io.IOException;
+import java.time.LocalDate;
+
 import Exceptions.*;
 
 public class GestorTareas {
@@ -31,18 +34,23 @@ public class GestorTareas {
         }
     }
 
-    public void addTarea(String id, String descripcion) throws TareaException {
+    public void addTarea(String id, String description, LocalDate expirationDate) throws TareaException {
         Validador.validarId(id);
         
         if (tareas.containsKey(id)) {
             throw new TareaDuplicadaException(id);
         }
         
-        Validador.validarDescripcion(descripcion);
+        Validador.validarDescripcion(description);
         
-        Tarea tarea = new Tarea(id, descripcion);
+        Tarea tarea = new Tarea(id, description, expirationDate);
         tareas.put(id, tarea);
         guardarTareas();
+    }
+
+    // Agregar tarea sin fecha (usa fecha por defecto)
+    public void addTarea(String id, String description) throws TareaException{
+        addTarea(id, description, LocalDate.now().plusWeeks(1));
     }
 
     public void deleteTarea(String id) throws TareaException {
@@ -60,13 +68,45 @@ public class GestorTareas {
         }
         
         Tarea tarea = tareas.get(id);
+        if (tarea.isExpired()) {
+            throw new TareaException(
+                "No se puede completar la tarea '" + id + 
+                "' porque está vencida."
+            );
+        }
+
         tarea.setCompleted(true);
         guardarTareas();
-    }
+    }    
 
     public List<Tarea> getAllTareas() {
         return tareas.values().stream()
+            .sorted()
             .collect(Collectors.toList());
+    }
+
+     public List<Tarea> filterTareas(Predicate<Tarea> filter) {
+        return tareas.values().stream()
+            .filter(filter)
+            .sorted()
+            .collect(Collectors.toList());
+    }
+
+    public List<Tarea> getTareasCompleted() {
+        return filterTareas(Tarea::isCompleted);
+    }
+
+    public List<Tarea> getTareasPending() {
+        return filterTareas(t -> !t.isCompleted() && !t.isExpired());
+    }
+
+    public List<Tarea> getTareasExpired() {
+        return filterTareas(Tarea::isExpired);
+    }
+
+    public void exportToCSV(String nameFile) throws IOException {
+        List<Tarea> listTareas = getAllTareas();
+        ExportadorCSV.exportTareas(listTareas, nameFile);
     }
 
     public boolean isEmpty() {

@@ -1,0 +1,8 @@
+[
+  {"id":"1","description":"Comprar regalo","completed":true,"expirationDate":"2025-10-30"},
+  {"id":"2","description":"Organizar evento","completed":false,"expirationDate":"2025-11-05"},
+  {"id":"3","description":"Comprar comida","completed":false,"expirationDate":"2025-10-29"},
+  {"id":"4","description":"Llamar amigos","completed":false,"expirationDate":"2025-10-21"},
+  {"id":"5","description":"Llamar familia","completed":false,"expirationDate":"2025-10-25"},
+  {"id":"6","description":"Pasear perro","completed":true,"expirationDate":"2025-10-28"}
+]
