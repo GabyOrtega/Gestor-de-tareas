@@ -36,6 +36,10 @@ public class Tarea implements Comparable<Tarea>{
         return this.completed;
     }
 
+    public boolean isExpired() {
+        return !completed && expirationDate.isBefore(LocalDate.now());
+    }
+
     public LocalDate getExpirationDate(){
         return this.expirationDate;
     }
@@ -50,10 +54,6 @@ public class Tarea implements Comparable<Tarea>{
 
     public void setExpirationDate(LocalDate date) {
         this.expirationDate = date;
-    }
-
-    public boolean isExpired() {
-        return !completed && expirationDate.isBefore(LocalDate.now());
     }
 
     public String toJSON() {
@@ -84,10 +84,20 @@ public class Tarea implements Comparable<Tarea>{
 
     // Conversión a CSV
     public String toCSV() {
+        String state;
+
+        if (isExpired()) {
+            state = "VENCIDA";
+        } else if (completed) {
+            state = "Completada";
+        } else {
+            state = "Pendiente";
+        }
+        
         return String.format("%s,%s,%s,%s",
             escapeCSV(id),
             escapeCSV(description),
-            completed ? "Completada" : "Pendiente",
+            state,
             expirationDate.format(FORMATTER)
         );
     }
